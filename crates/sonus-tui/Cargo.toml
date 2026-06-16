@@ -27,12 +27,12 @@ assets = [
     ["target/release/sonus", "usr/bin/sonus", "755"],
 ]
 
-[package.metadata.rpm.cargo]
-buildflags = ["--release"]
+[package.metadata.generate-rpm]
+assets = [
+    { source = "../../target/release/sonus", dest = "/usr/bin/sonus", mode = "755" }
+]
 
-[package.metadata.rpm.targets]
-sonus = { path = "/usr/bin/sonus" }
-
-[package.metadata.rpm]
-dependencies = ["yt-dlp", "alsa-lib"]
+[package.metadata.generate-rpm.requires]
+yt-dlp = "*"
+alsa-lib = "*"
 

@@ -56,7 +56,7 @@ jobs:
           cargo deb --manifest-path crates/sonus-tui/Cargo.toml --output dist/
           
           # RPM package (.rpm)
-          cargo generate-rpm --manifest-path crates/sonus-tui/Cargo.toml --output dist/sonus.rpm
+          cd crates/sonus-tui && cargo generate-rpm --output ../../dist/sonus.rpm && cd ../..
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
