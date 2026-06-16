@@ -10,6 +10,7 @@ depends=('yt-dlp' 'alsa-lib')
 makedepends=('cargo')
 source=("git+https://github.com/candied-apple/sonus.git#tag=v${pkgver}")
 sha256sums=('SKIP')
+options=(!lto)
 
 build() {
   cd "$pkgname"
