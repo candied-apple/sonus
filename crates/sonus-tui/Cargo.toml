@@ -20,3 +20,19 @@ unicode-width = "0.2"
 dirs = "6.0"
 rand = "0.8"
 spotapi = "0.2.4"
+
+[package.metadata.deb]
+depends = "yt-dlp, libasound2"
+assets = [
+    ["target/release/sonus", "usr/bin/sonus", "755"],
+]
+
+[package.metadata.rpm.cargo]
+buildflags = ["--release"]
+
+[package.metadata.rpm.targets]
+sonus = { path = "/usr/bin/sonus" }
+
+[package.metadata.rpm]
+dependencies = ["yt-dlp", "alsa-lib"]
+

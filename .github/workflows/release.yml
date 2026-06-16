@@ -39,15 +39,32 @@ jobs:
       - name: Build Binary
         run: cargo build --release
 
-      - name: Package Release Asset
+      - name: Install Packaging Tools
+        run: |
+          cargo install cargo-deb --locked
+          cargo install cargo-generate-rpm --locked
+
+      - name: Package Release Assets
         run: |
           mkdir -p dist
+          
+          # Standard tarball
           cp target/release/sonus dist/
           tar -czvf sonus-linux-x86_64.tar.gz -C dist sonus
+          
+          # Debian package (.deb)
+          cargo deb --package sonus --output dist/
+          
+          # RPM package (.rpm)
+          cargo generate-rpm --package sonus --output dist/sonus.rpm
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: sonus-linux-x86_64.tar.gz
+          files: |
+            sonus-linux-x86_64.tar.gz
+            dist/*.deb
+            dist/*.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
