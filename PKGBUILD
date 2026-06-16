@@ -13,6 +13,7 @@ sha256sums=('SKIP')
 
 build() {
   cd "$pkgname"
+  export LDFLAGS=""
   cargo build --release --locked
 }
 
