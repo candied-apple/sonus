@@ -53,10 +53,10 @@ jobs:
           tar -czvf sonus-linux-x86_64.tar.gz -C dist sonus
           
           # Debian package (.deb)
-          cargo deb --package sonus --output dist/
+          cargo deb --manifest-path crates/sonus-tui/Cargo.toml --output dist/
           
           # RPM package (.rpm)
-          cargo generate-rpm --package sonus --output dist/sonus.rpm
+          cargo generate-rpm --manifest-path crates/sonus-tui/Cargo.toml --output dist/sonus.rpm
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
