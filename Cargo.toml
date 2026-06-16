@@ -1,0 +1,12 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/sonus-core",
+    "crates/sonus-tui",
+]
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = true

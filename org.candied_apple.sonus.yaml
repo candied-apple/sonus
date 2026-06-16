@@ -1,0 +1,41 @@
+app-id: org.candied_apple.sonus
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.rust-stable
+command: sonus
+finish-args:
+  - --socket=fallback-to-x11
+  - --socket=wayland
+  - --socket=pulseaudio
+  - --share=network
+  - --share=ipc
+  - --device=all
+
+build-options:
+  append-path: /usr/lib/sdk/rust-stable/bin
+  build-args:
+    - --share=network
+
+modules:
+  # Dependency on yt-dlp runtime requirements (Python)
+  # Flatpak runtime org.freedesktop.Platform already includes Python 3.
+  # So we just download and bundle yt-dlp.
+  - name: yt-dlp
+    buildsystem: simple
+    build-commands:
+      - install -D -m755 yt-dlp /app/bin/yt-dlp
+    sources:
+      - type: file
+        url: https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp
+        sha256: 6a84eb827a5b6d51624b537f57cdbf67540292b3c2e171fb278eb0bf7f3e8f80 # Replace with latest sha256 or fetch dynamically
+
+  - name: sonus
+    buildsystem: simple
+    build-commands:
+      - cargo build --release --verbose
+      - install -D -m755 target/release/sonus /app/bin/sonus
+    sources:
+      - type: dir
+        path: .

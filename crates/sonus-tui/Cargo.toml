@@ -1,0 +1,22 @@
+[package]
+name = "sonus"
+version = "0.1.0"
+edition = "2024"
+description = "Terminal music player for YouTube Music"
+license = "MIT"
+repository = "https://github.com/candied-apple/sonus"
+homepage = "https://github.com/candied-apple/sonus"
+authors = ["candiedapple <alperenger@gmail.com>"]
+[dependencies]
+sonus-core = { path = "../sonus-core" }
+crossterm = "0.29.0"
+ratatui = "0.30.1"
+serde = "1.0.228"
+serde_json = "1"
+tokio = { version = "1.52.3", features = ["rt-multi-thread", "macros", "sync", "time"] }
+ratatui-image = { version = "11.0.4", default-features = false, features = ["crossterm", "image-defaults"] }
+image = "0.25.10"
+unicode-width = "0.2"
+dirs = "6.0"
+rand = "0.8"
+spotapi = "0.2.4"

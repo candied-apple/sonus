@@ -1,0 +1,11 @@
+/target
+sonus.db
+sonus.db-shm
+sonus.db-wal
+
+# makepkg artifacts
+/pkg/
+/src/
+/sonus/
+*.pkg.tar.*
+
