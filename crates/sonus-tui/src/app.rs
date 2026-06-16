@@ -42,6 +42,9 @@ pub(crate) struct App {
     pub(crate) db: Db,
     pub(crate) import_rx: Option<tokio::sync::mpsc::Receiver<ImportProgress>>,
     pub(crate) pending_version_check: Option<oneshot::Receiver<String>>,
+    pub(crate) mpris_cmd_rx: Option<std::sync::mpsc::Receiver<sonus_core::mpris::MprisCommand>>,
+    pub(crate) mpris_signal_tx: Option<tokio::sync::mpsc::UnboundedSender<sonus_core::mpris::MprisSignal>>,
+    pub(crate) mpris_state: Option<std::sync::Arc<std::sync::RwLock<sonus_core::mpris::MprisState>>>,
 }
 
 impl App {
@@ -82,6 +85,9 @@ impl App {
             db,
             import_rx: None,
             pending_version_check: None,
+            mpris_cmd_rx: None,
+            mpris_signal_tx: None,
+            mpris_state: None,
         };
         app.load_playlists_to_sidebar();
         if let Ok(history) = app.db.get_history_tracks() {
@@ -127,6 +133,18 @@ impl App {
                 .or_else(|| Some(ratatui_image::picker::Picker::halfblocks()));
         }
 
+        // Initialize cross-platform media controls
+        let (mpris_cmd_tx, mpris_cmd_rx) = std::sync::mpsc::channel();
+        let (mpris_signal_tx, mpris_signal_rx) = tokio::sync::mpsc::unbounded_channel();
+        let mpris_state = std::sync::Arc::new(std::sync::RwLock::new(sonus_core::mpris::MprisState::new()));
+
+        self.mpris_cmd_rx = Some(mpris_cmd_rx);
+        self.mpris_signal_tx = Some(mpris_signal_tx);
+        self.mpris_state = Some(mpris_state.clone());
+
+        sonus_core::mpris::spawn(mpris_cmd_tx, mpris_state, mpris_signal_rx);
+        self.update_mpris_state();
+
         let mut should_render = true;
         loop {
             if should_render {
@@ -144,6 +162,17 @@ impl App {
 
             while let Ok(evt) = player_evt_rx.try_recv() {
                 self.handle_player_event(evt);
+                should_render = true;
+            }
+
+            let mut mpris_cmds = Vec::new();
+            if let Some(ref rx) = self.mpris_cmd_rx {
+                while let Ok(cmd) = rx.try_recv() {
+                    mpris_cmds.push(cmd);
+                }
+            }
+            for cmd in mpris_cmds {
+                self.handle_mpris_command(cmd);
                 should_render = true;
             }
 
@@ -408,6 +437,10 @@ impl App {
             }
         }
 
+        if let Some(ref tx) = self.mpris_signal_tx {
+            let _ = tx.send(sonus_core::mpris::MprisSignal::Shutdown);
+        }
+
         Ok(())
     }
 
@@ -416,10 +449,12 @@ impl App {
             PlayerEvent::NowPlaying(title, artist) => {
                 self.state.player.status = PlayStatus::Playing;
                 self.state.player.current_track = Some((title, artist));
+                self.update_mpris_state();
             }
             PlayerEvent::Progress(pos, dur) => {
                 self.state.player.position = pos;
                 self.state.player.duration = dur;
+                self.update_mpris_position(pos);
             }
             PlayerEvent::Finished => {
                 let last_video_id = self.state.player.current_video_id.clone();
@@ -430,6 +465,7 @@ impl App {
                 self.state.player.duration = 0.0;
                 self.cover_image = None;
                 self.current_cover_video_id = None;
+                self.update_mpris_state();
                 self.play_next_in_queue();
                 if self.state.auto_play && self.state.queue.is_empty() {
                     if let Some(ref vid) = last_video_id {
@@ -782,9 +818,11 @@ impl App {
                         self.play_selected_track(player_cmd_tx);
                     }
                 }
+                self.update_mpris_state();
             }
             KeyCode::Char('s') => {
                 self.state.player.shuffle = !self.state.player.shuffle;
+                self.update_mpris_state();
             }
             KeyCode::Char('r') => {
                 self.state.player.repeat = match self.state.player.repeat {
@@ -792,6 +830,7 @@ impl App {
                     RepeatMode::All => RepeatMode::One,
                     RepeatMode::One => RepeatMode::None,
                 };
+                self.update_mpris_state();
             }
             KeyCode::Char('a') => {
                 self.state.auto_play = !self.state.auto_play;

@@ -425,7 +425,7 @@ impl YtmClient {
         let url = "https://lrclib.net/api/get";
         let res = shared_http_client()
             .get(url)
-            .header("User-Agent", "sonus/0.1.0 ( https://github.com/alp/sonus )")
+            .header("User-Agent", "sonus/0.2.0 ( https://github.com/alp/sonus )")
             .query(&[
                 ("artist_name", artist),
                 ("track_name", title),
@@ -459,7 +459,7 @@ pub async fn check_latest_release() -> Result<String, String> {
     let url = "https://api.github.com/repos/candied-apple/sonus/releases/latest";
     let res = shared_http_client()
         .get(url)
-        .header("User-Agent", "sonus/0.1.0")
+        .header("User-Agent", "sonus/0.2.0")
         .send()
         .await;
 

@@ -1,6 +1,6 @@
 # Maintainer: candiedapple <alperenger@gmail.com>
 pkgname=sonus
-pkgver=0.1.0
+pkgver=0.2.0
 pkgrel=1
 pkgdesc="Terminal music player for YouTube Music"
 arch=('x86_64')

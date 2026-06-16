@@ -1,6 +1,6 @@
 [package]
 name = "sonus-core"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "Core backend library for Sonus"
 
@@ -18,3 +18,4 @@ rusqlite = { version = "0.32.0", features = ["bundled"] }
 unicode-width = "0.2"
 dirs = "6.0"
 zbus = { version = "4", features = ["tokio"] }
+souvlaki = { version = "0.8.3", default-features = false, features = ["use_zbus"] }
