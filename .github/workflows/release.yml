@@ -41,8 +41,8 @@ jobs:
 
       - name: Install Packaging Tools
         run: |
-          cargo install cargo-deb --locked
-          cargo install cargo-generate-rpm --locked
+          cargo install cargo-deb --locked --force
+          cargo install cargo-generate-rpm --locked --force
 
       - name: Package Release Assets
         run: |
