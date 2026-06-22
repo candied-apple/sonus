@@ -20,7 +20,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pacman -Syu --noconfirm base-devel rust git
+          pacman -Syu --noconfirm base-devel rust git yt-dlp alsa-lib
 
       - name: Build Package
         run: |
