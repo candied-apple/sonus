@@ -9,34 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  build-arch:
-    name: Build Arch Linux Package
-    runs-on: ubuntu-latest
-    container: archlinux:latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Install Dependencies
-        run: |
-          pacman -Syu --noconfirm base-devel rust git yt-dlp alsa-lib
-
-      - name: Build Package
-        run: |
-          useradd -m builder
-          chown -R builder:builder .
-          su builder -c "makepkg -f --noconfirm"
-
-      - name: Upload to GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: sonus-*.pkg.tar.zst
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build-linux:
-    name: Build & Package (Linux)
+  release:
+    name: Build & Package
     runs-on: ubuntu-latest
 
     steps:
@@ -84,11 +58,21 @@ jobs:
           # RPM package (.rpm)
           cd crates/sonus-tui && cargo generate-rpm --output ../../dist/sonus.rpm && cd ../..
 
+      - name: Build Arch Linux Package
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/workspace archlinux:latest bash -c "
+            pacman -Syu --noconfirm base-devel rust git yt-dlp alsa-lib
+            cd /workspace
+            chown -R root:root .
+            makepkg -f --noconfirm
+          "
+
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             sonus-linux-x86_64.tar.gz
+            sonus-*.pkg.tar.zst
             dist/*.deb
             dist/*.rpm
         env:
