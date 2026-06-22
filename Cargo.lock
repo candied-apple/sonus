@@ -4295,7 +4295,7 @@ dependencies = [
 
 [[package]]
 name = "sonus"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "crossterm",
  "dirs",
@@ -4313,7 +4313,7 @@ dependencies = [
 
 [[package]]
 name = "sonus-core"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "dirs",
  "reqwest 0.12.28",
