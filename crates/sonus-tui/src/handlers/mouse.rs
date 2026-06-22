@@ -4,7 +4,7 @@ use std::sync::Arc;
 use crossterm::event::{MouseEvent, MouseEventKind};
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 
-use sonus_core::api::client::YtmClient;
+use sonus_core::api::YtmClient;
 use crate::app::App;
 use sonus_core::player::PlayerCommand;
 use crate::state::app_state::{Focus, PlayStatus, RepeatMode, SearchTab};
@@ -402,32 +402,16 @@ impl App {
                                     self.play_previous_in_queue();
                                 }
                             } else if play_range.contains(&offset) {
-                                match self.state.player.status {
-                                    PlayStatus::Playing => {
-                                        let _ = player_cmd_tx.send(PlayerCommand::Pause);
-                                        self.state.player.status = PlayStatus::Paused;
-                                    }
-                                    PlayStatus::Paused => {
-                                        let _ = player_cmd_tx.send(PlayerCommand::Resume);
-                                        self.state.player.status = PlayStatus::Playing;
-                                    }
-                                    PlayStatus::Stopped => {
-                                        self.play_selected_track(player_cmd_tx);
-                                    }
-                                }
+                                self.toggle_play_pause(player_cmd_tx);
                             } else if next_range.contains(&offset) {
                                 if !self.state.queue.is_empty() {
                                     let _ = player_cmd_tx.send(PlayerCommand::Stop);
                                     self.play_next_in_queue();
                                 }
                             } else if shuffle_range.contains(&offset) {
-                                self.state.player.shuffle = !self.state.player.shuffle;
+                                self.toggle_shuffle();
                             } else if repeat_range.contains(&offset) {
-                                self.state.player.repeat = match self.state.player.repeat {
-                                    RepeatMode::None => RepeatMode::All,
-                                    RepeatMode::All => RepeatMode::One,
-                                    RepeatMode::One => RepeatMode::None,
-                                };
+                                self.cycle_repeat_mode();
                             } else if auto_range.contains(&offset) {
                                 self.state.auto_play = !self.state.auto_play;
                             }

@@ -5,12 +5,5 @@ macro_rules! log {
     };
 }
 
-#[allow(dead_code)]
-pub fn entries() -> Vec<String> {
-    sonus_core::log::entries()
-}
 
-#[allow(dead_code)]
-pub fn clear() {
-    sonus_core::log::clear();
-}
+

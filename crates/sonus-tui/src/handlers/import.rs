@@ -2,7 +2,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use crate::app::App;
-use crate::state::app_state::TrackItem;
+use sonus_core::types::TrackItem;
 
 #[derive(Debug)]
 pub(crate) enum ImportProgress {

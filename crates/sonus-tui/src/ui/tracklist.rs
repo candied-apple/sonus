@@ -13,7 +13,7 @@ use crate::config;
 use crate::state::app_state::{AppState, Focus, SearchTab, TrackCategory, TrackItem};
 use crate::ui::components::{ensure_scroll, render_bordered_block};
 
-use crate::util::fit_to_width;
+use sonus_core::util::fit_to_width;
 
 pub fn render(f: &mut Frame, area: Rect, state: &mut AppState) {
     if area.width < 20 || area.height < 3 {
@@ -424,17 +424,17 @@ fn render_track_rows(
                     0
                 };
                 let slice: String = track.title.chars().skip(scroll_offset).collect();
-                fit_to_width(&slice, title_w, "")
+                fit_to_width(&slice, title_w, "").into_owned()
             } else {
-                fit_to_width(&track.title, title_w, "…")
+                fit_to_width(&track.title, title_w, "…").into_owned()
             }
         } else {
-            fit_to_width(&track.title, title_w, "")
+            fit_to_width(&track.title, title_w, "").into_owned()
         };
 
-        let artist = fit_to_width(&track.artist, artist_w, "…");
+        let artist = fit_to_width(&track.artist, artist_w, "…").into_owned();
         let fallback = if track.category == TrackCategory::Video { "Video" } else { "-" };
-        let album = fit_to_width(track.album.as_deref().unwrap_or(fallback), album_w, "…");
+        let album = fit_to_width(track.album.as_deref().unwrap_or(fallback), album_w, "…").into_owned();
 
         let spans = vec![
             play_indicator,
@@ -542,15 +542,15 @@ fn render_video_rows(
                     0
                 };
                 let slice: String = track.title.chars().skip(scroll_offset).collect();
-                fit_to_width(&slice, title_w, "")
+                fit_to_width(&slice, title_w, "").into_owned()
             } else {
-                fit_to_width(&track.title, title_w, "…")
+                fit_to_width(&track.title, title_w, "…").into_owned()
             }
         } else {
-            fit_to_width(&track.title, title_w, "")
+            fit_to_width(&track.title, title_w, "").into_owned()
         };
 
-        let channel = fit_to_width(&track.artist, channel_w, "…");
+        let channel = fit_to_width(&track.artist, channel_w, "…").into_owned();
 
         let spans = vec![
             play_indicator,

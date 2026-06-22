@@ -2,8 +2,9 @@ use std::sync::mpsc;
 
 use crate::app::App;
 use sonus_core::player::{PlayerCommand, PlayerEvent};
-use crate::state::app_state::{PlayStatus, Focus};
-use crate::state::command_palette::{ConfirmAction, PaletteMode};
+use crate::state::app_state::Focus;
+use crate::state::palette::{ConfirmAction, PaletteMode};
+
 
 impl App {
     pub(crate) fn open_command_palette(&mut self) {
@@ -40,7 +41,7 @@ impl App {
         let input = self.state.palette_input.to_lowercase();
         match self.state.palette_mode {
             PaletteMode::CommandSelection => {
-                self.state.palette_items = crate::state::command_palette::AVAILABLE_COMMANDS
+                self.state.palette_items = crate::state::palette::AVAILABLE_COMMANDS
                     .iter()
                     .filter(|cmd| cmd.name.to_lowercase().contains(&input) || cmd.description.to_lowercase().contains(&input))
                     .map(|cmd| format!("{} - {}", cmd.name, cmd.description))
@@ -255,29 +256,10 @@ impl App {
                     self.state.resize_mode = !self.state.resize_mode;
                     self.close_command_palette();
                 } else if selection.starts_with("playback: play/pause") {
-                    match self.state.player.status {
-                        PlayStatus::Playing => {
-                            let _ = _player_cmd_tx.send(PlayerCommand::Pause);
-                            self.state.player.status = PlayStatus::Paused;
-                        }
-                        PlayStatus::Paused => {
-                            let _ = _player_cmd_tx.send(PlayerCommand::Resume);
-                            self.state.player.status = PlayStatus::Playing;
-                        }
-                        PlayStatus::Stopped => {
-                            self.play_selected_track(_player_cmd_tx);
-                        }
-                    }
+                    self.toggle_play_pause(_player_cmd_tx);
                     self.close_command_palette();
                 } else if selection.starts_with("playback: stop") {
-                    let _ = _player_cmd_tx.send(PlayerCommand::Stop);
-                    self.state.player.status = PlayStatus::Stopped;
-                    self.state.player.current_track = None;
-                    self.state.player.current_video_id = None;
-                    self.state.player.position = 0.0;
-                    self.state.player.duration = 0.0;
-                    self.cover_image = None;
-                    self.current_cover_video_id = None;
+                    self.stop_playback();
                     self.close_command_palette();
                 } else if selection.starts_with("playback: next") {
                     if !self.state.queue.is_empty() {
@@ -296,32 +278,29 @@ impl App {
                     }
                     self.close_command_palette();
                 } else if selection.starts_with("playback: toggle shuffle") {
-                    self.state.player.shuffle = !self.state.player.shuffle;
-                    self.state.status_message = Some(format!("Shuffle is now {}", if self.state.player.shuffle { "on" } else { "off" }));
+                    self.toggle_shuffle();
                     self.close_command_palette();
                 } else if selection.starts_with("playback: toggle auto play") {
                     self.state.auto_play = !self.state.auto_play;
                     self.state.status_message = Some(format!("Auto-play is now {}", if self.state.auto_play { "on" } else { "off" }));
                     self.close_command_palette();
                 } else if selection.starts_with("playback: toggle repeat") {
-                    self.state.player.repeat = match self.state.player.repeat {
-                        crate::state::app_state::RepeatMode::None => crate::state::app_state::RepeatMode::All,
-                        crate::state::app_state::RepeatMode::All => crate::state::app_state::RepeatMode::One,
-                        crate::state::app_state::RepeatMode::One => crate::state::app_state::RepeatMode::None,
-                    };
-                    self.state.status_message = Some(format!("Repeat mode set to {:?}", self.state.player.repeat));
+                    self.cycle_repeat_mode();
                     self.close_command_palette();
                 } else if selection.starts_with("playback: repeat: none") {
                     self.state.player.repeat = crate::state::app_state::RepeatMode::None;
                     self.state.status_message = Some("Repeat mode disabled".to_string());
+                    self.update_mpris_state();
                     self.close_command_palette();
                 } else if selection.starts_with("playback: repeat: all") {
                     self.state.player.repeat = crate::state::app_state::RepeatMode::All;
                     self.state.status_message = Some("Repeat mode set to Repeat All".to_string());
+                    self.update_mpris_state();
                     self.close_command_palette();
                 } else if selection.starts_with("playback: repeat: one") {
                     self.state.player.repeat = crate::state::app_state::RepeatMode::One;
                     self.state.status_message = Some("Repeat mode set to Repeat One".to_string());
+                    self.update_mpris_state();
                     self.close_command_palette();
                 }
             }
@@ -379,7 +358,7 @@ impl App {
             PaletteMode::SeekInput => {
                 let input = self.state.palette_input.trim().to_string();
                 if !input.is_empty() {
-                    let parsed_secs = crate::util::parse_time_string(&input);
+                    let parsed_secs = sonus_core::util::parse_time_string(&input);
 
                     if let Some(target_secs) = parsed_secs {
                         let duration = self.state.player.duration;

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use tokio::sync::oneshot;
 
-use sonus_core::api::client::YtmClient;
+use sonus_core::api::YtmClient;
 use crate::app::{ApiResult, App};
 
 impl App {

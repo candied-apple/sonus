@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use tokio::sync::oneshot;
-use sonus_core::api::client::YtmClient;
+use sonus_core::api::YtmClient;
 use crate::app::{ApiResult, App};
 use crate::state::app_state::Focus;
 
@@ -31,7 +31,7 @@ impl App {
         }
 
         // Try loading from disk cache first
-        if let Some(cached) = crate::app::load_for_you_cache() {
+        if let Some(cached) = crate::cache::load_for_you_cache() {
             self.state.explore_for_you = cached;
             self.state.explore_loaded = true;
             return;

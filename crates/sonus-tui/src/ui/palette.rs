@@ -8,7 +8,8 @@ use ratatui::{
 
 use crate::config;
 use crate::state::app_state::AppState;
-use crate::state::command_palette::{ConfirmAction, PaletteMode};
+use crate::state::palette::{ConfirmAction, PaletteMode};
+
 
 pub fn render(f: &mut Frame, area: Rect, state: &AppState) {
     // Determine the prompt message

@@ -9,3 +9,5 @@ sonus.db-wal
 /sonus/
 *.pkg.tar.*
 
+# Build distribution packages
+/dist/

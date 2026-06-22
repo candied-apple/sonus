@@ -1,10 +1,12 @@
 mod app;
-mod commands;
+mod handlers;
 mod config;
 mod log;
 mod state;
 mod ui;
-mod util;
+mod cache;
+mod lrc;
+
 
 use std::sync::Arc;
 
@@ -12,7 +14,7 @@ use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
 use tokio::sync::mpsc;
 
-use sonus_core::api::client::YtmClient;
+use sonus_core::api::YtmClient;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {

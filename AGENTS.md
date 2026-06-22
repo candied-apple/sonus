@@ -3,8 +3,8 @@
 ## Must-follow constraints
 - `yt-dlp` must be on system PATH (runtime binary dependency).
 - Do not add YouTube Music authentication; the unauthenticated innertube client (`NoAuthToken`) is required.
-- Do not add a `toml` parsing crate; `~/.config/sonus/config.toml` is hand-parsed in `crates/sonus-core/src/config.rs` (line-by-line key=value, no inline comments, no nested tables).
-- LRCLib User-Agent must identify as `sonus/<version>`; currently hardcoded in `crates/sonus-core/src/api/client.rs`.
+- Do not add a `toml` parsing crate; `~/.config/sonus/config.toml` is hand-parsed in `crates/sonus-core/src/config/settings.rs` (line-by-line key=value, no inline comments, no nested tables).
+- LRCLib User-Agent must identify as `sonus/<version>`; currently hardcoded in `crates/sonus-core/src/api/lyrics.rs`.
 - Do not change `yt-dlp` extractor args `--extractor-args "youtubemusicapp:player_client=ios_music"` in `crates/sonus-core/src/player/stream.rs`; this selects the correct YouTube Music stream.
 
 ## Change safety

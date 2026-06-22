@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use sonus_core::api::client::YtmClient;
+use sonus_core::api::YtmClient;
 use crate::app::App;
 use crate::state::app_state::{Focus, SidebarItem};
 

@@ -1,6 +1,4 @@
 use std::sync::Arc;
-use std::time::Duration;
-
 use ytmapi_rs::auth::noauth::NoAuthToken;
 use ytmapi_rs::common::{PlaylistID, VideoID, YoutubeID};
 use ytmapi_rs::parse::{ParsedSongArtist, PlaylistItem, SearchResultVideo};
@@ -9,16 +7,7 @@ use ytmapi_rs::YtMusic;
 
 use crate::types::{TrackCategory, TrackItem};
 use crate::util;
-
-pub fn shared_http_client() -> &'static reqwest::Client {
-    static CLIENT: std::sync::OnceLock<reqwest::Client> = std::sync::OnceLock::new();
-    CLIENT.get_or_init(|| {
-        reqwest::Client::builder()
-            .timeout(Duration::from_secs(10))
-            .build()
-            .expect("reqwest client")
-    })
-}
+use super::lyrics::get_lyric_from_lrclib;
 
 pub struct YtmClient {
     inner: Option<Arc<YtMusic<NoAuthToken>>>,
@@ -389,7 +378,7 @@ impl YtmClient {
         title: &str,
         duration_secs: f64,
     ) -> Result<(Option<String>, Option<String>), String> {
-        if let Ok((plain, synced)) = self.get_lyric_from_lrclib(artist, title, duration_secs).await
+        if let Ok((plain, synced)) = get_lyric_from_lrclib(artist, title, duration_secs).await
         {
             if plain.is_some() || synced.is_some() {
                 return Ok((plain, synced));
@@ -422,61 +411,7 @@ impl YtmClient {
         title: &str,
         duration_secs: f64,
     ) -> Result<(Option<String>, Option<String>), String> {
-        let url = "https://lrclib.net/api/get";
-        let res = shared_http_client()
-            .get(url)
-            .header("User-Agent", "sonus/0.2.0 ( https://github.com/alp/sonus )")
-            .query(&[
-                ("artist_name", artist),
-                ("track_name", title),
-                ("duration", &format!("{}", duration_secs.round() as u64)),
-            ])
-            .send()
-            .await;
-
-        match res {
-            Ok(response) => {
-                if response.status().is_success() {
-                    #[derive(serde::Deserialize)]
-                    struct LrcResponse {
-                        #[serde(rename = "plainLyrics")]
-                        plain_lyrics: Option<String>,
-                        #[serde(rename = "syncedLyrics")]
-                        synced_lyrics: Option<String>,
-                    }
-                    if let Ok(data) = response.json::<LrcResponse>().await {
-                        return Ok((data.plain_lyrics, data.synced_lyrics));
-                    }
-                }
-                Err("No lyrics found in LRCLib".to_string())
-            }
-            Err(e) => Err(format!("LRCLib request failed: {e}")),
-        }
-    }
-}
-
-pub async fn check_latest_release() -> Result<String, String> {
-    let url = "https://api.github.com/repos/candied-apple/sonus/releases/latest";
-    let res = shared_http_client()
-        .get(url)
-        .header("User-Agent", "sonus/0.2.0")
-        .send()
-        .await;
-
-    match res {
-        Ok(response) => {
-            if response.status().is_success() {
-                #[derive(serde::Deserialize)]
-                struct GithubRelease {
-                    tag_name: String,
-                }
-                if let Ok(data) = response.json::<GithubRelease>().await {
-                    return Ok(data.tag_name);
-                }
-            }
-            Err("Failed to parse latest release".to_string())
-        }
-        Err(e) => Err(format!("GitHub Release request failed: {e}")),
+        get_lyric_from_lrclib(artist, title, duration_secs).await
     }
 }
 

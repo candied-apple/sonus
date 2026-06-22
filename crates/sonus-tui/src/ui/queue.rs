@@ -9,7 +9,7 @@ use ratatui::{
 use crate::config;
 use crate::state::app_state::AppState;
 use crate::ui::components::{ensure_scroll, render_bordered_block};
-use crate::util::fit_to_width;
+use sonus_core::util::fit_to_width;
 
 pub fn render(f: &mut Frame, area: Rect, state: &AppState) {
     if area.width < 10 || area.height < 3 {
