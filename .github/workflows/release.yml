@@ -61,7 +61,7 @@ jobs:
       - name: Build Arch Linux Package
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace archlinux:latest bash -c "
-            pacman -Syu --noconfirm base-devel rust git yt-dlp alsa-lib
+            pacman -Syu --noconfirm base-devel rust git yt-dlp alsa-lib cmake
             useradd -m builder
             chown -R builder:builder /workspace
             cd /workspace
