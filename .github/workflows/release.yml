@@ -62,9 +62,10 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace archlinux:latest bash -c "
             pacman -Syu --noconfirm base-devel rust git yt-dlp alsa-lib
+            useradd -m builder
+            chown -R builder:builder /workspace
             cd /workspace
-            chown -R root:root .
-            makepkg -f --noconfirm
+            su builder -c 'makepkg -f --noconfirm'
           "
 
       - name: Upload to GitHub Release
