@@ -15,7 +15,7 @@ options=(!lto)
 build() {
   cd "$pkgname"
   export LDFLAGS=""
-  cargo build --release --locked
+  cargo build --release
 }
 
 package() {
