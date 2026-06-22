@@ -9,6 +9,32 @@ permissions:
   contents: write
 
 jobs:
+  build-arch:
+    name: Build Arch Linux Package
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          pacman -Syu --noconfirm base-devel rust
+
+      - name: Build Package
+        run: |
+          useradd -m builder
+          chown -R builder:builder .
+          su builder -c "makepkg -f --noconfirm"
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: sonus-*.pkg.tar.zst
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build-linux:
     name: Build & Package (Linux)
     runs-on: ubuntu-latest
@@ -67,4 +93,3 @@ jobs:
             dist/*.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
