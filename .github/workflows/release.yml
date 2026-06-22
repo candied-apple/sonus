@@ -20,7 +20,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pacman -Syu --noconfirm base-devel rust
+          pacman -Syu --noconfirm base-devel rust git
 
       - name: Build Package
         run: |
